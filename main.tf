@@ -65,8 +65,8 @@ resource "aws_route_table_association" "public_route_table_association" {
   route_table_id = aws_route_table.public_route_table.id
 }
 
-resource "aws_route_table_association" "private_route_table_association" {
-  subnet_id      = aws_subnet.private_subnet.id
+resource "aws_main_route_table_association" "private_main_route_table_association" {
+  vpc_id         = aws_vpc.vpc.id
   route_table_id = aws_route_table.private_route_table.id
 }
 
@@ -104,6 +104,14 @@ resource "aws_security_group" "vpc_ssh_sg" {
     cidr_blocks = [aws_vpc.vpc.cidr_block]
   }
 
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
   tags = {
     Name = "carlos-vpc-ssh-sg"
   }
@@ -119,6 +127,14 @@ resource "aws_security_group" "public_ssh_sg" {
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
