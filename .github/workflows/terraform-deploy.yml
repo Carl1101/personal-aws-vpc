@@ -2,7 +2,7 @@ name: terraform-deploy
 on: 
   push:
     branches:
-      - master
+      - gh-actions
 jobs:
   bootstrap:
     name: 'Terraform Deploy: terraform-bootstrap'
@@ -16,14 +16,12 @@ jobs:
       - name: 'Setup Terraform'
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: $TERRAFORM_VERSION
-      - name: Configure AWS credentials from Test account
-        env:
-          AWS_ROLE: ${{ secrets.AWS_ROLE }}
+          terraform_version: ${{ vars.TERRAFORM_VERSION }}
+      - name: Configure AWS credentials from Test account 
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: $AWS_ROLE
-          aws-region: $AWS_REGION"
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ vars.AWS_REGION }}
       - name: 'Terraform Init: terraform-bootstrap'
         working-directory: ./terraform-bootstrap
         run: terraform init
@@ -46,19 +44,19 @@ jobs:
       - name: 'Setup Terraform'
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: env.TERRAFORM_VERSION
+          terraform_version: ${{ vars.TERRAFORM_VERSION }}
       - name: Configure AWS credentials from Test account
         env:
           AWS_ROLE: ${{ secrets.AWS_ROLE }}
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: $AWS_ROLE
-          aws-region: $AWS_REGION"
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ vars.AWS_REGION }}
       - name: 'Terraform Init: terraform-bootstrap'
         working-directory: ./vpc
         env: 
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-        run: terraform init -backend-config "bucket=$AWS_ACCOUNT_ID-terraform-state" -backend-config "dynamodb_table=$AWS_ACCOUNT_ID-terraform-state-lock" -backend-config "region=$AWS_REGION"
+        run: terraform init -backend-config "bucket=${{ secrets.AWS_ACCOUNT_ID }}-terraform-state" -backend-config "dynamodb_table=${{ secrets.AWS_ACCOUNT_ID }}-terraform-state-lock" -backend-config "region=${{ vars.AWS_REGION }}"
       - name: 'Terraform Validate: terraform-bootstrap'
         working-directory: ./vpc
         run: terraform validate -no-color
