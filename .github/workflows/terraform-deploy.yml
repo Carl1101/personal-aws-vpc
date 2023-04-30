@@ -2,7 +2,7 @@ name: terraform-deploy
 on: 
   push:
     branches:
-      - gh-actions
+      - master
 jobs:
   deploy:
     name: 'Terraform Deploy: VPC'
@@ -28,11 +28,3 @@ jobs:
         run: terraform init -backend-config "bucket=${{ secrets.AWS_ACCOUNT_ID }}-terraform-state" -backend-config "dynamodb_table=${{ secrets.AWS_ACCOUNT_ID }}-terraform-state-lock" -backend-config "region=${{ vars.AWS_REGION }}"
       - name: 'Terraform Apply'
         run: terraform apply -auto-approve
-
-
-      
-
-        
-      
-      
-        
