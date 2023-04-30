@@ -1,6 +1,7 @@
 name: terraform-lint
 on: 
   push:
+  pull_request:
 jobs:
   lint:
     name: 'Terraform Lint'
