@@ -22,14 +22,13 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ vars.AWS_REGION }}
-      - name: 'Terraform Init: terraform-bootstrap'
+      - name: 'Terraform Init'
         env: 
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
         run: terraform init -backend-config "bucket=${{ secrets.AWS_ACCOUNT_ID }}-terraform-state" -backend-config "dynamodb_table=${{ secrets.AWS_ACCOUNT_ID }}-terraform-state-lock" -backend-config "region=${{ vars.AWS_REGION }}"
-      - name: 'Terraform Validate: terraform-bootstrap'
-        run: terraform validate -no-color
-      - name: 'Terraform Apply: terraform-bootstrap'
+      - name: 'Terraform Apply'
         run: terraform apply -auto-approve
+
 
       
 
