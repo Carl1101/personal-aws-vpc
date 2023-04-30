@@ -1,0 +1,75 @@
+name: terraform-deploy
+on: 
+  push:
+    branches:
+      - master
+jobs:
+  bootstrap:
+    name: 'Terraform Deploy: terraform-bootstrap'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+      - name: 'Setup Terraform'
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: $TERRAFORM_VERSION
+      - name: Configure AWS credentials from Test account
+        env:
+          AWS_ROLE: ${{ secrets.AWS_ROLE }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: $AWS_ROLE
+          aws-region: $AWS_REGION"
+      - name: 'Terraform Init: terraform-bootstrap'
+        working-directory: ./terraform-bootstrap
+        run: terraform init
+      - name: 'Terraform Validate: terraform-bootstrap'
+        working-directory: ./terraform-bootstrap
+        run: terraform validate -no-color
+      - name: 'Terraform Apply: terraform-bootstrap'
+        working-directory: ./terraform-bootstrap
+        run: terraform apply -auto-approve
+      - name: 'Terraform Init Force Copy: terraform-bootstrap'
+        working-directory: ./terraform-bootstrap
+        run: terraform init -force-copy
+  vpc:
+    name: 'Terraform Deploy: VPC'
+    runs-on: ubuntu-latest
+    needs: bootstrap
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+      - name: 'Setup Terraform'
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: env.TERRAFORM_VERSION
+      - name: Configure AWS credentials from Test account
+        env:
+          AWS_ROLE: ${{ secrets.AWS_ROLE }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: $AWS_ROLE
+          aws-region: $AWS_REGION"
+      - name: 'Terraform Init: terraform-bootstrap'
+        working-directory: ./vpc
+        env: 
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: terraform init -backend-config "bucket=$AWS_ACCOUNT_ID-terraform-state" -backend-config "dynamodb_table=$AWS_ACCOUNT_ID-terraform-state-lock" -backend-config "region=$AWS_REGION"
+      - name: 'Terraform Validate: terraform-bootstrap'
+        working-directory: ./vpc
+        run: terraform validate -no-color
+      - name: 'Terraform Apply: terraform-bootstrap'
+        working-directory: ./vpc
+        run: terraform apply -auto-approve
+
+
+      
+
+        
+      
+      
+        
