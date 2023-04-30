@@ -1,9 +1,6 @@
 name: terraform-lint
 on: 
   push:
-  pull_request:
-    branches:
-      - master
 jobs:
   lint:
     name: 'Terraform Lint'
